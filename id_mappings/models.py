@@ -15,6 +15,9 @@ class Scheme(models.Model):
             name=repr(self.name),
         )
 
+    def __unicode__(self):
+        return self.name
+
 
 class Identifier(models.Model):
     value = models.CharField(max_length=512)
