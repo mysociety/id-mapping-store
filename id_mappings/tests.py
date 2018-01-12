@@ -164,3 +164,24 @@ class TestCreateEquivalence(FixtureMixin, TestCase):
             identifier_a=self.area_identifier,
             identifier_b=self.wd_identifier,
             deprecated=True).count()
+
+
+class TestSchemeList(FixtureMixin, TestCase):
+
+    def test_all_schemes_returned(self):
+        c = Client()
+        path = '/scheme'
+        response = c.get(path)
+        parsed_response = json.loads(response.content)
+        assert parsed_response == {
+            'results': [
+                {
+                    'id': self.area_scheme.id,
+                    'name': self.area_scheme.name,
+                },
+                {
+                    'id': self.wd_district_scheme.id,
+                    'name': self.wd_district_scheme.name,
+                },
+            ]
+        }

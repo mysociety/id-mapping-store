@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
-from django.views.generic import View, DetailView
+from django.views.generic import View, DetailView, ListView
 
 from .models import EquivalenceClaim, Identifier, Scheme
 
@@ -86,4 +86,22 @@ class EquivalenceClaimCreateView(View):
                 },
             },
             status=201,
+        )
+
+
+class SchemeListView(ListView):
+
+    queryset = Scheme.objects.order_by('id')
+
+    def render_to_response(self, context, **response_kwargs):
+        return JsonResponse(
+            {
+                'results': [
+                    {
+                        'id': scheme.id,
+                        'name': scheme.name,
+                    }
+                    for scheme in context['object_list']
+                ]
+            }
         )
