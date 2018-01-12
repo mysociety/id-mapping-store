@@ -7,4 +7,7 @@ urlpatterns = [
         r'^identifier/(?P<scheme>.+?)/(?P<value>.*)$',
         views.IdentifierLookupView.as_view(),
         name='identifier-lookup'),
+    url(r'^equivalence-claim/?$',
+        views.EquivalenceClaimCreateView.as_view(),
+        name='equivalence-create'),
 ]

@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
 import re
 
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
-from django.views.generic import DetailView
+from django.views.generic import View, DetailView
 
 from .models import EquivalenceClaim, Identifier, Scheme
+
 
 class IdentifierLookupView(DetailView):
 
@@ -52,3 +54,36 @@ class IdentifierLookupView(DetailView):
 
     def render_to_response(self, context, **response_kwargs):
         return JsonResponse(context['data'])
+
+
+class EquivalenceClaimCreateView(View):
+
+    http_method_names = 'post'
+
+    def post(self, request, *args, **kwargs):
+        posted_data = json.loads(request.body)
+        deprecated = posted_data.get('deprecated', False)
+        id_data_a = posted_data['identifier_a']
+        id_data_b = posted_data['identifier_b']
+        scheme_a_id = id_data_a['scheme_id']
+        scheme_b_id = id_data_b['scheme_id']
+        scheme_a = get_object_or_404(Scheme, pk=scheme_a_id)
+        scheme_b = get_object_or_404(Scheme, pk=scheme_b_id)
+        a, created_a = Identifier.objects.get_or_create(
+            scheme=scheme_a, value=id_data_a['value'])
+        b, created_b = Identifier.objects.get_or_create(
+            scheme=scheme_b, value=id_data_b['value'])
+        EquivalenceClaim.objects.create(
+            identifier_a=a, identifier_b=b, deprecated=deprecated
+        )
+        return JsonResponse(
+            {
+                'identifier_a': {
+                    'created': created_a
+                },
+                'identifier_b': {
+                    'created': created_b
+                },
+            },
+            status=201,
+        )
