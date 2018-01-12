@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.utils import timezone
 
 
 class Scheme(models.Model):
@@ -16,5 +17,5 @@ class Identifier(models.Model):
 class EquivalenceClaim(models.Model):
     identifier_a = models.ForeignKey(Identifier, related_name='claims_via_a')
     identifier_b = models.ForeignKey(Identifier, related_name='claims_via_b')
-    created = models.DateTimeField()
+    created = models.DateTimeField(default=timezone.now)
     deprecated = models.BooleanField(default=False)
