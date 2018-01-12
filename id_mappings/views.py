@@ -53,7 +53,7 @@ class IdentifierLookupView(DetailView):
         return context
 
     def render_to_response(self, context, **response_kwargs):
-        return JsonResponse(context['data'])
+        return JsonResponse(context['data'], json_dumps_params={'indent': 4})
 
 
 class EquivalenceClaimCreateView(View):
@@ -86,6 +86,7 @@ class EquivalenceClaimCreateView(View):
                 },
             },
             status=201,
+            json_dumps_params={'indent': 4},
         )
 
 
@@ -103,5 +104,6 @@ class SchemeListView(ListView):
                     }
                     for scheme in context['object_list']
                 ]
-            }
+            },
+            json_dumps_params={'indent': 4},
         )
