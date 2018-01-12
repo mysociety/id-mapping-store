@@ -3,4 +3,8 @@ from __future__ import unicode_literals
 
 from django.contrib import admin
 
-# Register your models here.
+from .models import EquivalenceClaim, Identifier, Scheme
+
+admin.site.register(EquivalenceClaim)
+admin.site.register(Identifier)
+admin.site.register(Scheme)
