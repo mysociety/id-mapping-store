@@ -38,9 +38,10 @@ class EquivalenceClaim(models.Model):
     deprecated = models.BooleanField(default=False)
 
     def __repr__(self):
-        fmt = '{class_}<({a_key}: {a_value}) <-> ({b_key}: {b_value}), created={created}{deprecated}>'
+        fmt = '{class_}<pk={pk} ({a_key}: {a_value}) <-> ({b_key}: {b_value}), created={created}{deprecated}>'
         return fmt.format(
             class_=self.__class__.__name__,
+            pk=self.pk,
             a_key=self.identifier_a.scheme.name,
             b_key=self.identifier_b.scheme.name,
             a_value=self.identifier_a.value,
