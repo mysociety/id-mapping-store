@@ -14,6 +14,7 @@ from django.utils.functional import cached_property
 from django.views.generic import View, DetailView, ListView
 
 from .models import EquivalenceClaim, Identifier, Scheme
+from api_keys.views import RequireAPIKeyMixin
 
 
 IdentifierFromClaim = namedtuple(
@@ -88,7 +89,7 @@ class IdentifierLookupView(DetailView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class EquivalenceClaimCreateView(View):
+class EquivalenceClaimCreateView(RequireAPIKeyMixin, View):
 
     http_method_names = 'post'
 

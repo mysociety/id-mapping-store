@@ -31,6 +31,7 @@ interface at `/admin/`.
 To associate two IDs from those schemes you can do:
 
     curl -X POST -H 'Content-Type: application/json' \
+        -H 'X-Api-Key: SOME-VALID-API-KEY-HERE' \
         'http://localhost:8000/equivalence-claim' \
         -d '{
                 "identifier_a": {
@@ -42,6 +43,10 @@ To associate two IDs from those schemes you can do:
                     "value": "Q1529479"
                 }
              }'
+
+You can create API keys in the admin interface at
+`/admin/`. This site should only be deployed behind HTTPS to
+protect these keys.
 
 To find all other IDs associated with a particular ID, you can
 do the following:
@@ -93,6 +98,7 @@ Instead of deleting an ID mapping, you would post the same claim
 but marking it as `deprecated`, e.g.:
 
     curl -X POST -H 'Content-Type: application/json' \
+        -H 'X-Api-Key: SOME-VALID-API-KEY-HERE' \
         'http://localhost:8000/equivalence-claim' \
         -d '{
                 "identifier_a": {

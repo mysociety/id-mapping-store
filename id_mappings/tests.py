@@ -7,6 +7,7 @@ import re
 from django.test import Client, TestCase
 
 from id_mappings.models import EquivalenceClaim, Identifier, Scheme
+from api_keys.models import APIKey
 
 ISO_TIMESTAMP_RE = re.compile(r'^(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d.\d{6}[+-]\d\d:\d\d)$')
 
@@ -25,6 +26,10 @@ class FixtureMixin(object):
         EquivalenceClaim.objects.create(
             identifier_a=self.area_identifier,
             identifier_b=self.wd_identifier)
+        self.api_key = APIKey.objects.create(
+            key='fb8f58725b644763230d4df3c74195b5',
+            notes='Example API key for tests',
+        )
 
 
 class TestIdentiferLookup(FixtureMixin, TestCase):
@@ -128,7 +133,7 @@ class TestIdentiferLookup(FixtureMixin, TestCase):
 
 class TestCreateEquivalence(FixtureMixin, TestCase):
 
-    def test_create_equivalence_new_identifiers(self):
+    def test_create_equivalence_with_no_api_token_fails(self):
         c = Client()
         path = '/equivalence-claim'
         response = c.post(
@@ -144,6 +149,26 @@ class TestCreateEquivalence(FixtureMixin, TestCase):
                 }
             }),
             content_type='application/json'
+        )
+        assert response.status_code == 403
+
+    def test_create_equivalence_new_identifiers(self):
+        c = Client()
+        path = '/equivalence-claim'
+        response = c.post(
+            path,
+            json.dumps({
+                'identifier_a': {
+                    'scheme_id': self.area_scheme.id,
+                    'value': 'gss:S14000003',
+                },
+                'identifier_b': {
+                    'scheme_id': self.wd_district_scheme.id,
+                    'value': 'Q408547',
+                }
+            }),
+            content_type='application/json',
+            HTTP_X_API_KEY=self.api_key.key,
         )
         assert response.status_code == 201
         # Now those two new identifiers should exist:
@@ -174,7 +199,8 @@ class TestCreateEquivalence(FixtureMixin, TestCase):
                     'value': self.wd_identifier.value,
                 }
             }),
-            content_type='application/json'
+            content_type='application/json',
+            HTTP_X_API_KEY=self.api_key.key,
         )
         assert response.status_code == 201
         # There should be no new identifiers created, just those from
@@ -207,7 +233,8 @@ class TestCreateEquivalence(FixtureMixin, TestCase):
                 },
                 'deprecated': True,
             }),
-            content_type='application/json'
+            content_type='application/json',
+            HTTP_X_API_KEY=self.api_key.key,
         )
         assert response.status_code == 201
         # There should be no new identifiers created, just those from

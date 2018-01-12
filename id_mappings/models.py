@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils import timezone
 
+from api_keys.models import APIKey
+
 
 class Scheme(models.Model):
     name = models.CharField(max_length=512)
@@ -36,6 +38,7 @@ class EquivalenceClaim(models.Model):
     identifier_b = models.ForeignKey(Identifier, related_name='claims_via_b')
     created = models.DateTimeField(default=timezone.now)
     deprecated = models.BooleanField(default=False)
+    api_key = models.ForeignKey(APIKey, blank=True, null=True)
 
     def other_identifier(self, not_this_identifier):
         if self.identifier_b == not_this_identifier:

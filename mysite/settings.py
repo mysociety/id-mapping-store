@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'id_mappings',
+    'api_keys',
     'django_extensions',
 ]
 
