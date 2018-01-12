@@ -37,6 +37,16 @@ class EquivalenceClaim(models.Model):
     created = models.DateTimeField(default=timezone.now)
     deprecated = models.BooleanField(default=False)
 
+    def other_identifier(self, not_this_identifier):
+        if self.identifier_b == not_this_identifier:
+            return self.identifier_a
+        elif self.identifier_a == not_this_identifier:
+            return self.identifier_b
+        else:
+            raise Exception('Neither identifier in {ec} was {i}'.format(
+                ec=repr(self), i=not_this_identifier
+            ))
+
     def __repr__(self):
         fmt = '{class_}<pk={pk} ({a_key}: {a_value}) <-> ({b_key}: {b_value}), created={created}{deprecated}>'
         return fmt.format(

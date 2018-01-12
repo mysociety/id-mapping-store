@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from collections import namedtuple, OrderedDict
 import json
 import re
 
@@ -13,6 +14,11 @@ from django.utils.functional import cached_property
 from django.views.generic import View, DetailView, ListView
 
 from .models import EquivalenceClaim, Identifier, Scheme
+
+
+IdentifierFromClaim = namedtuple(
+    'IdentifierFromClaim',
+    ['identifier', 'deprecated', 'created'])
 
 
 class IdentifierLookupView(DetailView):
@@ -30,15 +36,26 @@ class IdentifierLookupView(DetailView):
             Identifier, scheme=self.scheme_object, value=self.kwargs['value'])
 
     @cached_property
-    def equivalent_identifiers(self):
+    def equivalent_identifiers_from_claims(self):
         return [
-            ec.identifier_a if ec.identifier_b == self.get_object() \
-                else ec.identifier_b
+            IdentifierFromClaim(
+                identifier=ec.other_identifier(self.get_object()),
+                deprecated=ec.deprecated,
+                created=ec.created,
+            )
             for ec in EquivalenceClaim.objects.filter(
                 Q(identifier_a=self.object) |
                 Q(identifier_b=self.object)
             ).order_by('created')
         ]
+
+    @cached_property
+    def best_equivalent_identifiers(self):
+        resolved = OrderedDict()
+        for ifc in self.equivalent_identifiers_from_claims:
+            resolved[ifc.identifier] = ifc.deprecated
+        return [identifier for identifier, deprecated in resolved.items()
+                if not deprecated]
 
     def get_context_data(self, **kwargs):
         context = super(IdentifierLookupView, self).get_context_data(**kwargs)
@@ -49,7 +66,7 @@ class IdentifierLookupView(DetailView):
                     'scheme_id': i.scheme.id,
                     'scheme_name': i.scheme.name,
                 }
-                for i in self.equivalent_identifiers
+                for i in self.best_equivalent_identifiers
             ]
         }
         return context

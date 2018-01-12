@@ -69,6 +69,19 @@ class TestIdentiferLookup(FixtureMixin, TestCase):
             ]
         }
 
+    def test_no_identifier_returned_after_deprecation(self):
+        # Create a new claim which is the same, but marked deprecated:
+        deprecated_claim = EquivalenceClaim.objects.get()
+        deprecated_claim.pk = None
+        deprecated_claim.deprecated = True
+        deprecated_claim.save()
+        c = Client()
+        path = '/identifier/{0}/gss:S17000017'.format(self.area_scheme.id)
+        response = c.get(path)
+        assert response.status_code == 200
+        returned_data = json.loads(response.content)
+        assert returned_data == {'results': []}
+
 
 class TestCreateEquivalence(FixtureMixin, TestCase):
 
