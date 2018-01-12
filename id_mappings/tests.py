@@ -2,11 +2,13 @@
 from __future__ import unicode_literals
 
 import json
+import re
 
 from django.test import Client, TestCase
 
 from id_mappings.models import EquivalenceClaim, Identifier, Scheme
 
+ISO_TIMESTAMP_RE = re.compile(r'^(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d.\d{6}[+-]\d\d:\d\d)$')
 
 class FixtureMixin(object):
 
@@ -43,14 +45,24 @@ class TestIdentiferLookup(FixtureMixin, TestCase):
         response = c.get('/identifier/uk-area_id/gss:S17000017')
         assert response.status_code == 200
         returned_data = json.loads(response.content)
-        assert returned_data == {
-            'results': [
-                {
-                    'scheme_id': self.wd_district_scheme.id,
-                    'scheme_name': 'wikidata-district-item',
-                    'value': 'Q1529479',
-                }
-            ]
+        assert returned_data['results'] == [
+            {
+                'scheme_id': self.wd_district_scheme.id,
+                'scheme_name': 'wikidata-district-item',
+                'value': 'Q1529479',
+            }
+        ]
+        history = returned_data['history']
+        assert len(history) == 1
+        assert ISO_TIMESTAMP_RE.search(history[0]['created'])
+        history[0].pop('created')
+        assert history[0] == {
+            'identifier': {
+                'scheme_id': self.wd_district_scheme.id,
+                'scheme_name': 'wikidata-district-item',
+                'value': 'Q1529479',
+            },
+            'deprecated': False,
         }
 
     def test_identifier_found_via_scheme_id(self):
@@ -59,14 +71,24 @@ class TestIdentiferLookup(FixtureMixin, TestCase):
         response = c.get(path)
         assert response.status_code == 200
         returned_data = json.loads(response.content)
-        assert returned_data == {
-            'results': [
-                {
-                    'scheme_id': self.wd_district_scheme.id,
-                    'scheme_name': 'wikidata-district-item',
-                    'value': 'Q1529479',
-                }
-            ]
+        assert returned_data['results'] == [
+            {
+                'scheme_id': self.wd_district_scheme.id,
+                'scheme_name': 'wikidata-district-item',
+                'value': 'Q1529479',
+            }
+        ]
+        history = returned_data['history']
+        assert len(history) == 1
+        assert ISO_TIMESTAMP_RE.search(history[0]['created'])
+        history[0].pop('created')
+        assert history[0] == {
+            'identifier': {
+                'scheme_id': self.wd_district_scheme.id,
+                'scheme_name': 'wikidata-district-item',
+                'value': 'Q1529479',
+            },
+            'deprecated': False,
         }
 
     def test_no_identifier_returned_after_deprecation(self):
@@ -80,7 +102,28 @@ class TestIdentiferLookup(FixtureMixin, TestCase):
         response = c.get(path)
         assert response.status_code == 200
         returned_data = json.loads(response.content)
-        assert returned_data == {'results': []}
+        assert returned_data['results'] == []
+        history = returned_data['history']
+        assert len(history) == 2
+        for history_item in history:
+            assert ISO_TIMESTAMP_RE.search(history_item['created'])
+            history_item.pop('created')
+        assert history[0] == {
+            'identifier': {
+                'scheme_id': self.wd_district_scheme.id,
+                'scheme_name': 'wikidata-district-item',
+                'value': 'Q1529479',
+            },
+            'deprecated': False,
+        }
+        assert history[1] == {
+            'identifier': {
+                'scheme_id': self.wd_district_scheme.id,
+                'scheme_name': 'wikidata-district-item',
+                'value': 'Q1529479',
+            },
+            'deprecated': True,
+        }
 
 
 class TestCreateEquivalence(FixtureMixin, TestCase):

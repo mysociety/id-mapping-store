@@ -67,6 +67,18 @@ class IdentifierLookupView(DetailView):
                     'scheme_name': i.scheme.name,
                 }
                 for i in self.best_equivalent_identifiers
+            ],
+            'history': [
+                {
+                    'identifier': {
+                        'value': ifc.identifier.value,
+                        'scheme_id': ifc.identifier.scheme.id,
+                        'scheme_name': ifc.identifier.scheme.name,
+                    },
+                    'created': ifc.created.isoformat(),
+                    'deprecated': ifc.deprecated,
+                }
+                for ifc in self.equivalent_identifiers_from_claims
             ]
         }
         return context
