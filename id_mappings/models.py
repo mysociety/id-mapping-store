@@ -8,10 +8,24 @@ from django.utils import timezone
 class Scheme(models.Model):
     name = models.CharField(max_length=512)
 
+    def __repr__(self):
+        return '{class_}(pk={pk}, name={name})'.format(
+            class_=self.__class__.__name__,
+            pk=self.pk,
+            name=repr(self.name),
+        )
+
 
 class Identifier(models.Model):
     value = models.CharField(max_length=512)
     scheme = models.ForeignKey(Scheme)
+
+    def __repr__(self):
+        return '{class_}(value={value}, scheme={scheme})'.format(
+            class_=self.__class__.__name__,
+            value=repr(self.value),
+            scheme=repr(self.scheme)
+        )
 
 
 class EquivalenceClaim(models.Model):
@@ -19,3 +33,14 @@ class EquivalenceClaim(models.Model):
     identifier_b = models.ForeignKey(Identifier, related_name='claims_via_b')
     created = models.DateTimeField(default=timezone.now)
     deprecated = models.BooleanField(default=False)
+
+    def __repr__(self):
+        fmt = '{class_}<({a_key}: {a_value}) <-> ({b_key}: {b_value}), created={created}{deprecated}>'
+        return fmt.format(
+            class_=self.__class__.__name__,
+            a_key=self.identifier_a.scheme.name,
+            b_key=self.identifier_b.scheme.name,
+            a_value=self.identifier_a.value,
+            b_value=self.identifier_b.value,
+            created=self.created.isoformat(),
+            deprecated=(' DEPRECATED' if self.deprecated else ''))
