@@ -86,11 +86,11 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': conf.get('DB_NAME'),
-        'USER': conf.get('DB_USER'),
-        'PASSWORD': conf.get('DB_PASSWORD'),
-        'HOST': conf.get('DB_HOST'),
-        'PORT': conf.get('DB_PORT'),
+        'NAME': conf.get('ID_MAPPING_STORE_DB_NAME'),
+        'USER': conf.get('ID_MAPPING_STORE_DB_USER'),
+        'PASSWORD': conf.get('ID_MAPPING_STORE_DB_PASSWORD'),
+        'HOST': conf.get('ID_MAPPING_STORE_DB_HOST'),
+        'PORT': conf.get('ID_MAPPING_STORE_DB_PORT'),
     }
 }
 
