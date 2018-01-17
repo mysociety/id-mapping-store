@@ -19,7 +19,7 @@ from api_keys.views import RequireAPIKeyMixin
 
 IdentifierFromClaim = namedtuple(
     'IdentifierFromClaim',
-    ['identifier', 'deprecated', 'created'])
+    ['identifier', 'deprecated', 'created', 'comment'])
 
 
 class IdentifierLookupView(DetailView):
@@ -43,6 +43,7 @@ class IdentifierLookupView(DetailView):
                 identifier=ec.other_identifier(self.get_object()),
                 deprecated=ec.deprecated,
                 created=ec.created,
+                comment=ec.comment,
             )
             for ec in EquivalenceClaim.objects.filter(
                 Q(identifier_a=self.object) |
@@ -78,6 +79,7 @@ class IdentifierLookupView(DetailView):
                     },
                     'created': ifc.created.isoformat(),
                     'deprecated': ifc.deprecated,
+                    'comment': ifc.comment,
                 }
                 for ifc in self.equivalent_identifiers_from_claims
             ]

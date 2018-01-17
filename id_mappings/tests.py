@@ -68,6 +68,7 @@ class TestIdentiferLookup(FixtureMixin, TestCase):
                 'value': 'Q1529479',
             },
             'deprecated': False,
+            'comment': '',
         }
 
     def test_identifier_found_via_scheme_id(self):
@@ -94,6 +95,37 @@ class TestIdentiferLookup(FixtureMixin, TestCase):
                 'value': 'Q1529479',
             },
             'deprecated': False,
+            'comment': '',
+        }
+
+    def test_identifier_includes_claim_comments(self):
+        ec = EquivalenceClaim.objects.get()
+        ec.comment = 'Created a mapping for Glasgow (SPE)'
+        ec.save()
+        c = Client()
+        path = '/identifier/{0}/gss:S17000017'.format(self.area_scheme.id)
+        response = c.get(path)
+        assert response.status_code == 200
+        returned_data = json.loads(response.content)
+        assert returned_data['results'] == [
+            {
+                'scheme_id': self.wd_district_scheme.id,
+                'scheme_name': 'wikidata-district-item',
+                'value': 'Q1529479',
+            }
+        ]
+        history = returned_data['history']
+        assert len(history) == 1
+        assert ISO_TIMESTAMP_RE.search(history[0]['created'])
+        history[0].pop('created')
+        assert history[0] == {
+            'identifier': {
+                'scheme_id': self.wd_district_scheme.id,
+                'scheme_name': 'wikidata-district-item',
+                'value': 'Q1529479',
+            },
+            'deprecated': False,
+            'comment': 'Created a mapping for Glasgow (SPE)',
         }
 
     def test_no_identifier_returned_after_deprecation(self):
@@ -120,6 +152,7 @@ class TestIdentiferLookup(FixtureMixin, TestCase):
                 'value': 'Q1529479',
             },
             'deprecated': False,
+            'comment': '',
         }
         assert history[1] == {
             'identifier': {
@@ -128,6 +161,7 @@ class TestIdentiferLookup(FixtureMixin, TestCase):
                 'value': 'Q1529479',
             },
             'deprecated': True,
+            'comment': '',
         }
 
 
