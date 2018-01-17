@@ -25,6 +25,13 @@ class Identifier(models.Model):
     value = models.CharField(max_length=512)
     scheme = models.ForeignKey(Scheme)
 
+    def as_json(self):
+        return {
+            'value': self.value,
+            'scheme_id': self.scheme.id,
+            'scheme_name': self.scheme.name,
+        }
+
     def __repr__(self):
         return '{class_}(value={value}, scheme={scheme})'.format(
             class_=self.__class__.__name__,

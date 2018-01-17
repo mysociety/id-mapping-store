@@ -62,21 +62,10 @@ class IdentifierLookupView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(IdentifierLookupView, self).get_context_data(**kwargs)
         context['data'] = {
-            'results': [
-                {
-                    'value': i.value,
-                    'scheme_id': i.scheme.id,
-                    'scheme_name': i.scheme.name,
-                }
-                for i in self.best_equivalent_identifiers
-            ],
+            'results': [i.as_json() for i in self.best_equivalent_identifiers],
             'history': [
                 {
-                    'identifier': {
-                        'value': ifc.identifier.value,
-                        'scheme_id': ifc.identifier.scheme.id,
-                        'scheme_name': ifc.identifier.scheme.name,
-                    },
+                    'identifier': ifc.identifier.as_json(),
                     'created': ifc.created.isoformat(),
                     'deprecated': ifc.deprecated,
                     'comment': ifc.comment,
