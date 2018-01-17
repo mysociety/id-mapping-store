@@ -27,7 +27,7 @@ conf = get_conf('general.yml')
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ug!%9j402vfbqii6sy(=4e$&vwl9ebqne2raaoo8od&vgve4y!'
+SECRET_KEY = conf.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

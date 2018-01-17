@@ -6,3 +6,6 @@ ID_MAPPING_STORE_DB_HOST: ''
 
 ALLOWED_HOSTS:
   - '.example.com'
+
+
+DJANGO_SECRET_KEY: ''
