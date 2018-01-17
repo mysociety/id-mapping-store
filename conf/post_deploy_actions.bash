@@ -8,4 +8,4 @@ cd `dirname $0`/..
 
 source .venv/bin/activate
 
-./manage.py migrate --no-initial-data
+./manage.py migrate
