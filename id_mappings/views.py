@@ -173,5 +173,5 @@ class IdentifiersForSchemeView(View):
                     for identifier, mapped_identifiers
                     in identifier_to_resolved_identifiers.items()
                 }
-            }
+            }, json_dumps_params={'indent': 4}
         )
