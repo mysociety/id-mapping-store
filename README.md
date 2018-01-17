@@ -41,9 +41,11 @@ To associate two IDs from those schemes you can do:
                 "identifier_b": {
                     "scheme_id": 2,
                     "value": "Q1529479"
-                }
+                },
+                "comment": "Adding the Wikidata ID for Glasgow"
              }'
 
+The `comment` field is optional, but may be helpful.
 You can create API keys in the admin interface at
 `/admin/`. This site should only be deployed behind HTTPS to
 protect these keys.
@@ -71,6 +73,7 @@ do the following:
                     "scheme_id": 2,
                     "value": "Q1529479"
                 },
+                "comment": "Adding the Wikidata ID for Glasgow"
                 "created": "2018-01-12T18:18:25.315565+00:00"
             }
         ]
@@ -129,6 +132,7 @@ either identifier; e.g.:
                     "scheme_id": 2,
                     "value": "Q1529479"
                 },
+                "comment": "Adding the Wikidata ID for Glasgow"
                 "created": "2018-01-12T18:18:25.315565+00:00"
             },
             {
