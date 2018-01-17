@@ -30,7 +30,7 @@ conf = get_conf('general.yml')
 SECRET_KEY = conf.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(int(conf.get('STAGING')))
 
 ALLOWED_HOSTS = conf.get('ALLOWED_HOSTS', [])
 
