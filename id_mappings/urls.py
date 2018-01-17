@@ -13,4 +13,6 @@ urlpatterns = [
     url(r'^scheme/?$',
         views.SchemeListView.as_view(),
         name='scheme-list'),
+    url(r'^scheme/(?P<scheme>.+?)/?$',
+        views.IdentifiersForSchemeView.as_view()),
 ]

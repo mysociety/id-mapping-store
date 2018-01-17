@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from collections import namedtuple, OrderedDict
+from collections import defaultdict, namedtuple, OrderedDict
 import json
 import re
 
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -131,4 +131,47 @@ class SchemeListView(ListView):
                 ]
             },
             json_dumps_params={'indent': 4},
+        )
+
+
+class IdentifiersForSchemeView(View):
+
+    def get(self, request, *args, **kwargs):
+        scheme = get_object_or_404(Scheme, pk=kwargs['scheme'])
+        identifier_to_resolved_identifiers = defaultdict(OrderedDict)
+        # Find any claims with identifiers from that scheme, in order
+        # of creation:
+        for ec in EquivalenceClaim.objects.filter(
+                Q(identifier_a__scheme=scheme) |
+                Q(identifier_b__scheme=scheme)
+            ).select_related('identifier_a__scheme', 'identifier_b__scheme').order_by('created'):
+            # There might be an identifier with this scheme on either
+            # or both sides of the equivalence claim, so try both:
+            for identifier in (ec.identifier_a, ec.identifier_b):
+                other_identifier = ec.other_identifier(identifier)
+                if identifier.scheme == scheme:
+                    other_ifc = IdentifierFromClaim(
+                        identifier=other_identifier,
+                        deprecated=ec.deprecated,
+                        created=ec.created,
+                        comment=ec.comment,
+                    )
+                    # The claims have been ordered by creation
+                    # timestamp, so this wil leave us with the latest
+                    # deprecation status:
+                    identifier_to_resolved_identifiers[identifier.value][other_ifc.identifier] = other_ifc.deprecated
+        # Filter out any deprecated relationships in the response:
+        return JsonResponse(
+            {
+                'results': {
+                    identifier:
+                    [
+                        other_scheme_identifier.as_json()
+                        for other_scheme_identifier, deprecated
+                        in mapped_identifiers.items() if not deprecated
+                    ]
+                    for identifier, mapped_identifiers
+                    in identifier_to_resolved_identifiers.items()
+                }
+            }
         )

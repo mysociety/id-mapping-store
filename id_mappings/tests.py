@@ -335,3 +335,107 @@ class TestSchemeList(FixtureMixin, TestCase):
                 },
             ]
         }
+
+class TestListIdentifiersForScheme(FixtureMixin, TestCase):
+
+    def test_no_identifiers_for_new_scheme(self):
+        unused_scheme = Scheme.objects.create(name='unused')
+        c = Client()
+        path = '/scheme/{0}'.format(unused_scheme.pk)
+        response = c.get(path)
+        assert response.status_code == 200
+        parsed_response = json.loads(response.content)
+        assert parsed_response == {'results': {}}
+
+    def test_scheme_used_in_identifier_a(self):
+        c = Client()
+        path = '/scheme/{0}'.format(self.area_scheme.pk)
+        response = c.get(path)
+        assert response.status_code == 200
+        parsed_response = json.loads(response.content)
+        assert parsed_response == {
+            'results': {
+                'gss:S17000017': [
+                    {
+                        'value': 'Q1529479',
+                        'scheme_id': self.wd_district_scheme.id,
+                        'scheme_name': self.wd_district_scheme.name,
+                    }
+                ]
+            }
+        }
+
+    def test_scheme_used_in_identifier_b(self):
+        c = Client()
+        path = '/scheme/{0}'.format(self.wd_district_scheme.pk)
+        response = c.get(path)
+        assert response.status_code == 200
+        parsed_response = json.loads(response.content)
+        assert parsed_response == {
+            'results': {
+                'Q1529479': [
+                    {
+                        'value': 'gss:S17000017',
+                        'scheme_id': self.area_scheme.id,
+                        'scheme_name': self.area_scheme.name,
+                    }
+                ]
+            }
+        }
+
+    def test_deprecated_equivalence_suppressed_from_scheme_a(self):
+        deprecated_claim = EquivalenceClaim.objects.get()
+        deprecated_claim.pk = None
+        deprecated_claim.deprecated = True
+        deprecated_claim.save()
+        c = Client()
+        path = '/scheme/{0}'.format(self.wd_district_scheme.pk)
+        response = c.get(path)
+        assert response.status_code == 200
+        parsed_response = json.loads(response.content)
+        assert parsed_response == {'results': {'Q1529479': []}}
+
+    def test_deprecated_equivalence_suppressed_from_scheme_b(self):
+        deprecated_claim = EquivalenceClaim.objects.get()
+        deprecated_claim.pk = None
+        deprecated_claim.deprecated = True
+        deprecated_claim.save()
+        c = Client()
+        path = '/scheme/{0}'.format(self.area_scheme.pk)
+        response = c.get(path)
+        assert response.status_code == 200
+        parsed_response = json.loads(response.content)
+        assert parsed_response == {'results': {'gss:S17000017': []}}
+
+    def test_multiple_identifiers_either_side_from_scheme_returned(self):
+        gss_id = Identifier.objects.create(
+            value='gss:S14000003', scheme=self.area_scheme)
+        wd_id = Identifier.objects.create(
+            value='Q408547', scheme=self.wd_district_scheme)
+        EquivalenceClaim.objects.create(
+            identifier_a=wd_id,
+            identifier_b=gss_id,
+        )
+        # Now try to fetch all IDs from the Wikidata scheme:
+        c = Client()
+        path = '/scheme/{0}'.format(self.wd_district_scheme.pk)
+        # There should be two queries here: one to fetch the scheme
+        # from the URL and one to fetch the EquivalentClaim and all
+        # dependent objects.
+        with self.assertNumQueries(2):
+            response = c.get(path)
+        assert response.status_code == 200
+        parsed_response = json.loads(response.content)
+        results = parsed_response['results']
+        assert len(results) == 2
+        # Sort the results for a predictable comparison:
+        assert sorted(results.items()) == [
+            ('Q1529479',
+             [{'scheme_id': 29,
+               'scheme_name': 'uk-area_id',
+               'value': 'gss:S17000017'}]),
+            ('Q408547',
+             [{'scheme_id': 29,
+               'scheme_name': 'uk-area_id',
+               'value': 'gss:S14000003'}])
+        ]
