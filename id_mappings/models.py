@@ -39,6 +39,7 @@ class EquivalenceClaim(models.Model):
     created = models.DateTimeField(default=timezone.now)
     deprecated = models.BooleanField(default=False)
     api_key = models.ForeignKey(APIKey, blank=True, null=True)
+    comment = models.TextField(default='')
 
     def other_identifier(self, not_this_identifier):
         if self.identifier_b == not_this_identifier:
