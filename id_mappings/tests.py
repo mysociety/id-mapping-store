@@ -321,6 +321,7 @@ class TestSchemeList(FixtureMixin, TestCase):
         c = Client()
         path = '/scheme'
         response = c.get(path)
+        assert response.status_code == 200
         parsed_response = json.loads(response.content)
         assert parsed_response == {
             'results': [
