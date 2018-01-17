@@ -88,7 +88,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': conf.get('ID_MAPPING_STORE_DB_NAME'),
         'USER': conf.get('ID_MAPPING_STORE_DB_USER'),
-        'PASSWORD': conf.get('ID_MAPPING_STORE_DB_PASSWORD'),
+        'PASSWORD': conf.get('ID_MAPPING_STORE_DB_PASS'),
         'HOST': conf.get('ID_MAPPING_STORE_DB_HOST'),
         'PORT': conf.get('ID_MAPPING_STORE_DB_PORT'),
     }
