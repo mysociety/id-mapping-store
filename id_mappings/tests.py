@@ -217,6 +217,38 @@ class TestCreateEquivalence(FixtureMixin, TestCase):
         assert not parsed_response['identifier_a']['created']
         assert not parsed_response['identifier_b']['created']
 
+    def test_create_equivalence_claim_with_comment(self):
+        c = Client()
+        path = '/equivalence-claim'
+        response = c.post(
+            path,
+            json.dumps({
+                'identifier_a': {
+                    'scheme_id': self.area_scheme.id,
+                    'value': self.area_identifier.value,
+                },
+                'identifier_b': {
+                    'scheme_id': self.wd_district_scheme.id,
+                    'value': self.wd_identifier.value,
+                },
+                'comment': 'UK: mapping from ONS ID to Wikidata item ID for Glasgow (Scottish Parliament region)'
+            }),
+            content_type='application/json',
+            HTTP_X_API_KEY=self.api_key.key,
+        )
+        assert response.status_code == 201
+        # There should be no new identifiers created, just those from
+        # the fixture mixin.
+        assert 1 == Identifier.objects.filter(scheme=self.area_scheme).count()
+        assert 1 == Identifier.objects.filter(scheme=self.wd_district_scheme).count()
+        # However,
+        claims_after = EquivalenceClaim.objects.filter(
+            identifier_a=self.area_identifier,
+            identifier_b=self.wd_identifier,
+            deprecated=False).order_by('created')
+        assert 2 == claims_after.count()
+        assert claims_after.last().comment == 'UK: mapping from ONS ID to Wikidata item ID for Glasgow (Scottish Parliament region)'
+
     def test_create_deprecation(self):
         c = Client()
         path = '/equivalence-claim'

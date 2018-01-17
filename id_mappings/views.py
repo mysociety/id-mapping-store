@@ -96,6 +96,7 @@ class EquivalenceClaimCreateView(RequireAPIKeyMixin, View):
     def post(self, request, *args, **kwargs):
         posted_data = json.loads(request.body)
         deprecated = posted_data.get('deprecated', False)
+        comment = posted_data.get('comment', '')
         id_data_a = posted_data['identifier_a']
         id_data_b = posted_data['identifier_b']
         scheme_a_id = id_data_a['scheme_id']
@@ -107,7 +108,7 @@ class EquivalenceClaimCreateView(RequireAPIKeyMixin, View):
         b, created_b = Identifier.objects.get_or_create(
             scheme=scheme_b, value=id_data_b['value'])
         EquivalenceClaim.objects.create(
-            identifier_a=a, identifier_b=b, deprecated=deprecated
+            identifier_a=a, identifier_b=b, deprecated=deprecated, comment=comment
         )
         return JsonResponse(
             {
