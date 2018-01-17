@@ -32,7 +32,7 @@ SECRET_KEY = 'ug!%9j402vfbqii6sy(=4e$&vwl9ebqne2raaoo8od&vgve4y!'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = conf.get('ALLOWED_HOSTS', [])
 
 
 # Application definition
