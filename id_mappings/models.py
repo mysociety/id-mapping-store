@@ -59,7 +59,7 @@ class EquivalenceClaim(models.Model):
             ))
 
     def __repr__(self):
-        fmt = '{class_}<pk={pk} ({a_key}: {a_value}) <-> ({b_key}: {b_value}), created={created}{deprecated}>'
+        fmt = '{class_}<pk={pk} ({a_key}: {a_value}) <-> ({b_key}: {b_value}), created={created}{deprecated}{comment}>'
         return fmt.format(
             class_=self.__class__.__name__,
             pk=self.pk,
@@ -68,4 +68,6 @@ class EquivalenceClaim(models.Model):
             a_value=self.identifier_a.value,
             b_value=self.identifier_b.value,
             created=self.created.isoformat(),
-            deprecated=(' DEPRECATED' if self.deprecated else ''))
+            deprecated=(' DEPRECATED' if self.deprecated else ''),
+            comment=(' comment="{0}"'.format(self.comment) if self.comment else '')
+        )
