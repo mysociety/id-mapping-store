@@ -146,3 +146,31 @@ either identifier; e.g.:
             }
         ]
     }
+
+You can see all identifers (and the identifier that they're
+mapped to) for a particular scheme with, for example:
+
+    curl 'http://localhost:8000/scheme/2
+
+... which would return only the best mappings for each
+identifier in the scheme (i.e. not including deprecated
+mappings). For example, a response to that request might be:
+
+    {
+        "results": {
+            "Q1529479": [
+                {
+                    "scheme_name": "uk-area_id",
+                    "scheme_id": 29,
+                    "value": "gss:S17000017"
+                }
+            ],
+            "Q408547": [
+                {
+                    "scheme_name": "uk-area_id",
+                    "scheme_id": 29,
+                    "value": "gss:S14000003"
+                }
+            ]
+        }
+    }
